@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Physics of Context Engineering - Presenter Cockpit</title>
+  <style>
+    /* slidecraft/src/css/presenter.css */
+body.presenter-mode {
+  background: #06070a;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.cockpit-layout {
+  display: grid;
+  grid-template-rows: 60px 1fr 140px;
+  grid-template-columns: 1.15fr 0.85fr;
+  height: 100vh;
+  gap: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* Header Bar */
+.cockpit-header {
+  grid-column: 1 / -1;
+  background: #0f131a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.cockpit-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: #00f0ff;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cockpit-stats {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.timer-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  color: #00ff88;
+}
+
+.timer-box.warning {
+  color: #ffb700;
+}
+
+.timer-box.overtime {
+  color: #f43f5e;
+}
+
+.slide-counter-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+/* Center Left: Previews */
+.previews-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-current {
+  flex: 2;
+  background: #0a0c10;
+  border: 2px solid #00f0ff;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-next {
+  flex: 1.2;
+  background: #0a0c10;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0.85;
+}
+
+.preview-label {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  border-radius: 3px;
+  color: #00f0ff;
+  text-transform: uppercase;
+}
+
+.preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none;
+}
+
+/* Center Right: Speaker Notes & Cues */
+.notes-panel {
+  background: #0f131a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.notes-header {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.notes-content {
+  font-size: 21px;
+  line-height: 1.6;
+  color: #f1f5f9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.notes-content strong {
+  color: #00ff88;
+}
+
+.notes-content .stage-cue {
+  display: block;
+  background: rgba(255, 183, 0, 0.12);
+  border-left: 3px solid #ffb700;
+  padding: 8px 12px;
+  margin: 12px 0;
+  font-size: 17px;
+  color: #ffd269;
+}
+
+/* Bottom: Thumbnails / Chapter strip */
+.thumbnails-panel {
+  grid-column: 1 / -1;
+  background: #0f131a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  overflow-x: auto;
+}
+
+.thumb-card {
+  flex: 0 0 160px;
+  height: 90px;
+  background: #141923;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.thumb-card:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  background: #1b212f;
+}
+
+.thumb-card.active {
+  border: 2px solid #00f0ff;
+  background: #1e2638;
+}
+
+.thumb-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.thumb-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #94a3b8;
+  display: flex;
+  justify-content: space-between;
+}
+
+  </style>
+</head>
+<body class="presenter-mode">
+  <div class="cockpit-layout">
+    <!-- Header -->
+    <header class="cockpit-header">
+      <div class="cockpit-brand">
+        <span>⚡ SLIDECRAFT COCKPIT</span>
+        <span style="color: #64748b;">|</span>
+        <span style="color: #cbd5e1;">The Physics of Context Engineering</span>
+      </div>
+      <div class="cockpit-stats">
+        <div class="slide-counter-badge" id="slideCounter">1 / --</div>
+        <div class="timer-box" id="timerDisplay" title="Press 'T' to Pause/Resume, 'R' to Reset">00:00</div>
+      </div>
+    </header>
+
+    <!-- Center Left: Split Previews -->
+    <div class="previews-panel">
+      <div class="preview-current">
+        <div class="preview-label">Live on Projector</div>
+        <iframe id="currentFrame" class="preview-frame" src="audience.html"></iframe>
+      </div>
+      <div class="preview-next">
+        <div class="preview-label" style="color:#ffb700;">Up Next</div>
+        <iframe id="nextFrame" class="preview-frame" src="audience.html"></iframe>
+      </div>
+    </div>
+
+    <!-- Center Right: Speaker Notes -->
+    <div class="notes-panel">
+      <div class="notes-header">
+        <span>Speaker Delivery Notes & Stage Cues</span>
+        <span style="color: #00ff88;">Keys: Space/Arrows (Next), B (Blackout), T (Timer)</span>
+      </div>
+      <div class="notes-content" id="notesContent">
+        Loading speaker notes...
+      </div>
+    </div>
+
+    <!-- Bottom: Thumbnails / Chapter Strip -->
+    <nav class="thumbnails-panel" id="thumbnailsContainer"></nav>
+  </div>
+
+  <script>
+    window.SLIDECRAFT_DATA = [
+  {
+    "index": 0,
+    "id": "slide-1",
+    "meta": {
+      "title": "The Physics of Context Engineering",
+      "subtitle": "Why 2 Million Tokens Cannot Fix Diluted Attention",
+      "layout": "title",
+      "chapter": "Opening",
+      "footer": "Context Engineering Keynote",
+      "tags": [
+        "title",
+        "hook"
+      ]
+    },
+    "notes": "[STAGE: Walk center stage, pause 3 seconds before speaking]\r\nGood morning everyone.\r\nHow many of you have seen the latest LLM benchmarks bragging about a 1 million or 2 million token context window?\r\nShow of hands. Almost everyone.\r\nAnd how many of you have pasted an entire codebase into one of these models, only to watch it hallucinate the simplest function or completely ignore rule number one?\r\nToday, we are going to look behind the marketing hype and examine the actual mathematics of the Transformer.\r\nBy the end of this talk, you will understand why context engineering is not about stuffing more data in—it is about keeping noise out.",
+    "filePath": "talks\\context-engineering\\slides\\01-hook\\01-title.md"
+  },
+  {
+    "index": 1,
+    "id": "slide-2",
+    "meta": {
+      "title": "The 2M Token Illusion",
+      "subtitle": "Context Capacity Does Not Equal Focused Reasoning",
+      "layout": "split-2col",
+      "chapter": "The Illusion",
+      "footer": "Context capacity is a storage metric, not a focus metric",
+      "tags": [
+        "illusion",
+        "tokens",
+        "capacity"
+      ]
+    },
+    "notes": "[STAGE: Move toward audience, conversational tone]\r\nVendors love to market context windows as hard drives: \"Now with 2 Million Tokens!\"\r\nAs software engineers, we understand memory: RAM vs CPU Cache.\r\nYou would never dump a 10GB database into L1 cache and expect single-cycle execution.\r\nYet that is exactly what we do when we dump 500 lines of terminal logs, 20 test files, and 4 schemas into a single prompt.\r\nThe model doesn't get smarter with more context. It gets louder.\r\nLet's look at the mathematical reason why.",
+    "filePath": "talks\\context-engineering\\slides\\01-hook\\02-the-2m-illusion.md"
+  },
+  {
+    "index": 2,
+    "id": "slide-3",
+    "meta": {
+      "title": "The Softmax Attention Equation",
+      "subtitle": "The Mathematical Physics of the Attention Mechanism",
+      "layout": "math-focus",
+      "chapter": "The Math",
+      "footer": "Scaled Dot-Product Attention: Vaswani et al., 2017",
+      "tags": [
+        "math",
+        "softmax",
+        "transformer"
+      ]
+    },
+    "notes": "[STAGE: Point to the equation on the screen]\r\nHere is the core of every modern Large Language Model: Vaswani et al., 2017.\r\nScaled Dot-Product Attention.\r\nYou have three matrices:\r\nQ is the Query: what the model is generating right now.\r\nK is the Key: the address tag of every token that came before.\r\nV is the Value: the actual information.\r\nNotice that little word wrapped around Q and K transpose?\r\n`softmax`.\r\nThat single function is why your prompts degrade over time.\r\nLet's zoom into the softmax denominator on the next slide.",
+    "filePath": "talks\\context-engineering\\slides\\02-the-math\\01-softmax-attention.md"
+  },
+  {
+    "index": 3,
+    "id": "slide-4",
+    "meta": {
+      "title": "The Zero-Sum Attention Budget",
+      "subtitle": "Why Every Additional Token Dilutes Critical Rules",
+      "layout": "split-2col",
+      "chapter": "The Math",
+      "footer": "Sum of attention weights is always identically 1.0 (100%)",
+      "tags": [
+        "math",
+        "zero-sum",
+        "budget"
+      ]
+    },
+    "notes": "[STAGE: Pause for emphasis. Use hand gestures to show shrinking budget]\r\nLook at the denominator in this formula:\r\nThe sum from m=1 to N of exp(s_im).\r\nN is the number of tokens in your context window.\r\nWhen N is 50 tokens, the denominator is small. The model assigns 30% of its attention to your security requirement.\r\nWhen N reaches 50,000 tokens—because of terminal logs, old stack traces, and 15 previous chat turns—the denominator explodes.\r\nThat same security rule that had 30% attention?\r\nIts weight is crushed down to 0.05%.\r\nMathematically, the signal disappears into the exponential noise floor.",
+    "filePath": "talks\\context-engineering\\slides\\02-the-math\\02-zero-sum-budget.md"
+  },
+  {
+    "index": 4,
+    "id": "slide-5",
+    "meta": {
+      "title": "The Three Pathologies of Context Rot",
+      "subtitle": "How Attention Dilution Breaks Real Code in Real Projects",
+      "layout": "3col",
+      "chapter": "Context Rot",
+      "footer": "Diagnosing LLM performance collapse in prolonged sessions",
+      "tags": [
+        "symptoms",
+        "context-rot",
+        "bugs"
+      ]
+    },
+    "notes": "[STAGE: Connect with audience developer experience]\r\nEvery developer in this room has experienced Context Rot.\r\nIt usually starts around message 12 of a long chat session.\r\nSymptom 1: Zombie Code. You told the model 5 minutes ago: \"That library is deprecated, don't use it!\" Yet it imports it again. Why? Because the broken code is sitting in the context window acting as a positive autoregressive prime.\r\nSymptom 2: Constraint Bleed. You specified strict typing at the start. After 15 turns, it starts spitting out `any` and unhandled promises.\r\nSymptom 3: Multi-Hop Collapse. It fixes line 42, but breaks the contract between the frontend DTO and the backend controller.",
+    "filePath": "talks\\context-engineering\\slides\\03-context-rot\\01-three-symptoms.md"
+  },
+  {
+    "index": 5,
+    "id": "slide-6",
+    "meta": {
+      "title": "The Kitchen Order Analogy",
+      "subtitle": "Why Your IDE Chat Is Like an Overcrowded Restaurant Kitchen",
+      "layout": "split-2col",
+      "chapter": "Mental Models",
+      "footer": "Ctrl+L / New Chat is not starting over—it is cleaning the prep counter",
+      "tags": [
+        "analogy",
+        "kitchen",
+        "focus"
+      ]
+    },
+    "notes": "[STAGE: Tell as a story with expressive timing]\r\nImagine you are the head chef at a high-end restaurant.\r\nA ticket comes in: \"Table 4, medium rare steak. SEVERE PEANUT ALLERGY.\"\r\nIf that is the only ticket on your prep board, you are laser-focused. You sterilize the knives, check the oil, execute safely.\r\nNow imagine your prep board has 200 receipts from yesterday, old napkins, coffee stains, and customer complaints from last Tuesday.\r\nThe peanut allergy note is still there—at position 42.\r\nWhat happens during dinner rush? You miss it.\r\nWhen you leave an IDE chat open for 3 hours, you are forcing the model to work on that messy prep counter.\r\n`Ctrl+L` or starting a fresh chat is not losing progress—it is wiping the counter clean.",
+    "filePath": "talks\\context-engineering\\slides\\03-context-rot\\02-zombie-code-priming.md"
+  },
+  {
+    "index": 6,
+    "id": "slide-7",
+    "meta": {
+      "title": "Rotary Position Embeddings (RoPE)",
+      "subtitle": "The 'Lost in the Middle' Phenomenon Is Built Into Math",
+      "layout": "split-2col",
+      "chapter": "The Math",
+      "footer": "Liu et al. (2023) - Lost in the Middle: How Language Models Use Long Contexts",
+      "tags": [
+        "rope",
+        "lost-in-middle",
+        "embeddings"
+      ]
+    },
+    "notes": "[STAGE: Draw a U-curve in the air with hand]\r\nIn 2023, Stanford and UC Berkeley published a landmark paper: \"Lost in the Middle\".\r\nThey proved that modern LLMs using Rotary Position Embeddings (RoPE) don't attend to context uniformly.\r\nThe attention curve forms a sharp 'U'.\r\nThe start of the context—your system instructions—gets high weight.\r\nThe end of the context—your latest question—gets high weight.\r\nEverything in between? It falls into the attention dead zone.\r\nIf you dump a 400-page API documentation PDF into the prompt, the model will faithfully read the preface and the index, and completely forget chapter 14 in the middle.",
+    "filePath": "talks\\context-engineering\\slides\\03-context-rot\\03-constraint-bleed.md"
+  },
+  {
+    "index": 7,
+    "id": "slide-8",
+    "meta": {
+      "title": "Attention Budgeting in Practice",
+      "subtitle": "Architecting Context Like You Architect Memory Hierarchy",
+      "layout": "3col",
+      "chapter": "Solutions",
+      "footer": "Context Engineering Tier: Global -> Scoped -> Dynamic Inline",
+      "tags": [
+        "solutions",
+        "budgeting",
+        "instructions"
+      ]
+    },
+    "notes": "[STAGE: Walk audience through practical implementation]\r\nSo how do we engineer context correctly?\r\nWe use Attention Budgeting.\r\nWe treat context like a memory cache hierarchy:\r\nLevel 1: Global instructions. Keep this under 50 lines. Only write down what makes your project unique. Never teach the model what a REST API is—it already knows.\r\nLevel 2: Scoped instructions. Use `applyTo` globs. If you are editing an Angular component, don't load the SQL database conventions. Keep the denominator lean.\r\nLevel 3: Task-level inline context. Point to the specific file `#file` and the specific function. When the task is done, clear the session.",
+    "filePath": "talks\\context-engineering\\slides\\04-solutions\\01-attention-budgeting.md"
+  },
+  {
+    "index": 8,
+    "id": "slide-9",
+    "meta": {
+      "title": "Scoped Context via applyTo Globs",
+      "subtitle": "Loading Rules on Demand to Preserve Attention Mass",
+      "layout": "split-2col",
+      "chapter": "Solutions",
+      "footer": "VS Code Scoped Instructions Pattern: .github/instructions/*.instructions.md",
+      "tags": [
+        "globs",
+        "vscode",
+        "scoped"
+      ]
+    },
+    "notes": "[STAGE: Point out the contrast between left and right code blocks]\r\nHere is the concrete difference in code.\r\nOn the left: The Mega Prompt. Developers dump their entire tech stack into one giant prompt file.\r\nWhen you are tweaking a CSS button, the model is still loading 50 lines of PostgreSQL foreign key rules.\r\nThat is wasted attention denominator mass.\r\nOn the right: Scoped instructions with `applyTo` globs.\r\nThe Angular rules are only loaded when you edit TypeScript files in `frontend/src/`.\r\nWhen you switch to backend Java files, those tokens vanish and make room for Spring Boot rules.\r\nClean counter. Zero denominator bloat.",
+    "filePath": "talks\\context-engineering\\slides\\04-solutions\\02-scoped-instructions.md"
+  },
+  {
+    "index": 9,
+    "id": "slide-10",
+    "meta": {
+      "title": "The Model Routing Matrix",
+      "subtitle": "Matching Context Size and Reasoning Effort to the Real Task",
+      "layout": "table-focus",
+      "chapter": "Solutions",
+      "footer": "Stick to the diagonal: Never combine maximum context with maximum reasoning",
+      "tags": [
+        "routing",
+        "matrix",
+        "architecture"
+      ]
+    },
+    "notes": "[STAGE: Walk across stage, deliver with authority]\r\nRemember this table. Write it down.\r\nThere are two legitimate sweet spots in modern AI engineering:\r\nSweet spot one: Minimal context (<16k tokens) with maximum reasoning. This is for surgical coding, complex bug fixing, and test-driven development. No context rot, zero hallucinations.\r\nSweet spot two: Massive context (1M+ tokens) with low reasoning. This is for scanning entire repos, finding deprecated API calls, and generating high-level summaries.\r\nThe fatal mistake developers make is row 3:\r\nDumping 500k tokens and demanding deep multi-hop reasoning.\r\nYou get 60-second latencies, massive dollar costs, and complete reasoning collapse.\r\nStay on the diagonal!",
+    "filePath": "talks\\context-engineering\\slides\\04-solutions\\03-model-routing-matrix.md"
+  },
+  {
+    "index": 10,
+    "id": "slide-11",
+    "meta": {
+      "title": "The 5 Golden Rules of Context Engineering",
+      "subtitle": "What You Should Do Tomorrow Morning at Your Desk",
+      "layout": "split-2col",
+      "chapter": "Takeaways",
+      "footer": "Practical heuristics for daily AI-assisted software engineering",
+      "tags": [
+        "rules",
+        "takeaways",
+        "heuristics"
+      ]
+    },
+    "notes": "[STAGE: Stand center stage, project confidence]\r\nHere are five concrete rules you can take back to your teams on Monday morning:\r\nRule 1: The 15-Message Rule. Don't spend 20 minutes arguing with a confused model. Clear the prep counter. Start fresh.\r\nRule 2: Document the unique, not the universal.\r\nRule 3: Scope instructions with globs.\r\nRule 4: Respect the U-curve. Critical rules go at the bookends, never buried in middle noise.\r\nRule 5: Stay on the diagonal. High reasoning requires minimal context.",
+    "filePath": "talks\\context-engineering\\slides\\05-takeaways\\01-golden-rules.md"
+  },
+  {
+    "index": 11,
+    "id": "slide-12",
+    "meta": {
+      "title": "Attention Is All You Need. Protect It.",
+      "subtitle": "Thank You & Open Q&A",
+      "layout": "closing",
+      "chapter": "Closing",
+      "footer": "The Physics of Context Engineering - Keynote Conclusion",
+      "tags": [
+        "closing",
+        "qa"
+      ]
+    },
+    "notes": "[STAGE: Open hands, invite questions, smile]\r\nIn 2017, the original Transformer paper was titled: \"Attention Is All You Need.\"\r\nSeven years later, our advice as context engineers is:\r\nAttention is all you need. So protect it like gold.\r\nThank you very much. I would love to take your questions!",
+    "filePath": "talks\\context-engineering\\slides\\05-takeaways\\02-closing.md"
+  }
+];
+  </script>
+  <script>
+    // slidecraft/src/js/sync-engine.js
+// Sub-50ms window synchronization using BroadcastChannel + localStorage fallback
+
+class SlideSyncEngine {
+  constructor(channelName = 'slidecraft_presentation_channel') {
+    this.channelName = channelName;
+    this.listeners = [];
+    this.hasBroadcastChannel = typeof BroadcastChannel !== 'undefined';
+    
+    if (this.hasBroadcastChannel) {
+      try {
+        this.bc = new BroadcastChannel(this.channelName);
+        this.bc.onmessage = (event) => this.dispatch(event.data);
+      } catch (err) {
+        console.warn('[SyncEngine] BroadcastChannel failed, using localStorage fallback', err);
+        this.hasBroadcastChannel = false;
+      }
+    }
+
+    // Always wire storage listener as reliable fallback
+    window.addEventListener('storage', (event) => {
+      if (event.key === this.channelName && event.newValue) {
+        try {
+          const data = JSON.parse(event.newValue);
+          this.dispatch(data);
+        } catch (e) {}
+      }
+    });
+  }
+
+  onMessage(callback) {
+    this.listeners.push(callback);
+  }
+
+  dispatch(message) {
+    this.listeners.forEach((fn) => fn(message));
+  }
+
+  send(type, payload = {}) {
+    const message = {
+      type,
+      ...payload,
+      timestamp: Date.now()
+    };
+
+    if (this.hasBroadcastChannel && this.bc) {
+      try {
+        this.bc.postMessage(message);
+      } catch (e) {}
+    }
+
+    try {
+      localStorage.setItem(this.channelName, JSON.stringify(message));
+    } catch (e) {}
+  }
+
+  navigate(slideIndex) {
+    this.send('SLIDE_CHANGE', { index: slideIndex });
+  }
+
+  toggleBlank(active) {
+    this.send('BLANK_TOGGLE', { active });
+  }
+
+  syncTimer(elapsedSeconds, isRunning) {
+    this.send('TIMER_SYNC', { elapsedSeconds, isRunning });
+  }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SlideSyncEngine;
+} else {
+  window.SlideSyncEngine = SlideSyncEngine;
+}
+
+  </script>
+  <script>
+    // slidecraft/src/js/presenter-controller.js
+(function() {
+  const sync = new window.SlideSyncEngine('slidecraft_presentation_channel');
+  const slidesData = window.SLIDECRAFT_DATA || [];
+  let currentIndex = 0;
+  let isBlank = false;
+  let timerSeconds = 0;
+  let timerInterval = null;
+
+  // DOM Elements
+  const timerEl = document.getElementById('timerDisplay');
+  const slideCounterEl = document.getElementById('slideCounter');
+  const notesContentEl = document.getElementById('notesContent');
+  const currentFrame = document.getElementById('currentFrame');
+  const nextFrame = document.getElementById('nextFrame');
+  const thumbsContainer = document.getElementById('thumbnailsContainer');
+
+  function formatTime(totalSec) {
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function startTimer() {
+    if (timerInterval) return;
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      if (timerEl) {
+        timerEl.textContent = formatTime(timerSeconds);
+        // Pacing alert: 20 min mark amber, 25 min mark red
+        if (timerSeconds >= 1500) {
+          timerEl.className = 'timer-box overtime';
+        } else if (timerSeconds >= 1200) {
+          timerEl.className = 'timer-box warning';
+        }
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    timerSeconds = 0;
+    if (timerEl) {
+      timerEl.textContent = '00:00';
+      timerEl.className = 'timer-box';
+    }
+  }
+
+  function renderSlide(index) {
+    if (index < 0 || index >= slidesData.length) return;
+    currentIndex = index;
+
+    // Update audience via sync
+    sync.navigate(currentIndex);
+
+    // Update Counter
+    if (slideCounterEl) {
+      slideCounterEl.textContent = `${currentIndex + 1} / ${slidesData.length}`;
+    }
+
+    // Update Notes
+    const slide = slidesData[currentIndex];
+    if (notesContentEl) {
+      if (slide && slide.notes) {
+        // Highlight [STAGE: ...] cues
+        let formattedNotes = slide.notes.replace(/\[STAGE:\s*(.*?)\]/gi, '<div class="stage-cue"><strong>🎬 STAGE:</strong> $1</div>');
+        notesContentEl.innerHTML = formattedNotes;
+      } else {
+        notesContentEl.innerHTML = '<span style="color:#64748b; font-style:italic;">No notes provided for this slide.</span>';
+      }
+    }
+
+    // Update Previews
+    if (currentFrame && currentFrame.contentWindow) {
+      currentFrame.contentWindow.postMessage({ type: 'GOTO_SLIDE', index: currentIndex }, '*');
+    }
+    if (nextFrame && nextFrame.contentWindow) {
+      nextFrame.contentWindow.postMessage({ type: 'GOTO_SLIDE', index: currentIndex + 1 }, '*');
+    }
+
+    // Update active thumb
+    document.querySelectorAll('.thumb-card').forEach((card, idx) => {
+      if (idx === currentIndex) {
+        card.classList.add('active');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      } else {
+        card.classList.remove('active');
+      }
+    });
+  }
+
+  function buildThumbnails() {
+    if (!thumbsContainer) return;
+    thumbsContainer.innerHTML = '';
+    slidesData.forEach((s, idx) => {
+      const card = document.createElement('div');
+      card.className = `thumb-card ${idx === 0 ? 'active' : ''}`;
+      card.innerHTML = `
+        <div class="thumb-title">${s.meta.title || `Slide ${idx + 1}`}</div>
+        <div class="thumb-meta">
+          <span>#${idx + 1}</span>
+          <span>${s.meta.chapter || ''}</span>
+        </div>
+      `;
+      card.onclick = () => renderSlide(idx);
+      thumbsContainer.appendChild(card);
+    });
+  }
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      if (currentIndex < slidesData.length - 1) {
+        renderSlide(currentIndex + 1);
+      }
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      if (currentIndex > 0) {
+        renderSlide(currentIndex - 1);
+      }
+    } else if (e.key.toLowerCase() === 'b') {
+      isBlank = !isBlank;
+      sync.toggleBlank(isBlank);
+    } else if (e.key.toLowerCase() === 't') {
+      if (timerInterval) pauseTimer();
+      else startTimer();
+    } else if (e.key.toLowerCase() === 'r') {
+      resetTimer();
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    buildThumbnails();
+    renderSlide(0);
+    startTimer();
+  });
+})();
+
+  </script>
+</body>
+</html>
