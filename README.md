@@ -69,7 +69,11 @@ Direct file opening works for deck reading. If your browser does not synchronize
 
 ## Toolkit Validation
 
-For the external Agent Markdown Linter Suite, lint customization entry points with `.github/agents/*.agent.md`, `.github/prompts/*.prompt.md`, `.github/skills/*/SKILL.md`, and `.github/copilot-instructions.md`.
+Run the external Agent Markdown Linter Suite from this repository:
 
-Do not pass `.github/**/*.md` to that suite: it currently classifies Markdown reference documents as skill entry points and incorrectly requires their own frontmatter and short code blocks. Check reference links and the syntax of fenced JavaScript separately.
+```bash
+node "C:/Data/_engg-guild/agent-markdown-linter-suite/scripts/lint-agents.mjs" ".github/**/*.md"
+```
+
+The linter distinguishes skill entry points from bundled Markdown references. References retain Markdown syntax and link validation without requiring skill frontmatter, workflow containers, or short code blocks. The inline code-block limit still applies to skill entry points.
 

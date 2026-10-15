@@ -8,7 +8,10 @@ Welcome to **SlideCraft**, an agent-first Markdown toolkit for creating presenta
 
 All maintained content, instructions, and reusable code snippets live in Markdown. The slide-architect agent reads skills and generates HTML directly, without a compiler, `src/`, or package-based build pipeline.
 
+Never introduce a maintained runtime source tree or package-based compiler; keep reusable code in the skills' Markdown references.
+
 Talk metadata lives in `talks/<talk-name>/talk.md` YAML frontmatter. Slides live in the talk's `slides/` directory. Generated HTML goes under `dist/<talk-name>/`:
+
 - `audience.html` — Clean 16:9 projector display without clutter or speaker controls.
 - `presenter.html` — Dual-screen presenter cockpit (preview, next slide, elapsed timer, live speaker notes).
 - `deck.html` — Standalone presentation for reading or online sharing.
@@ -16,6 +19,7 @@ Talk metadata lives in `talks/<talk-name>/talk.md` YAML frontmatter. Slides live
 ## Slide Markdown Conventions
 
 Every slide lives in its own `.md` file inside `talks/<talk-name>/slides/<chapter>/`:
+
 ```markdown
 ---
 title: "Slide Title"

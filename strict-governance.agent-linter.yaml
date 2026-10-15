@@ -1,0 +1,84 @@
+# =====================================================================
+# Preset: Strict Enterprise Governance for GitHub Copilot
+# Best for regulated environments, core engineering guilds, or high-assurance repos.
+# =====================================================================
+
+version: "1.0"
+defaultHarness: "vscode"
+
+rules:
+  # Frontmatter schema errors are strictly blocking
+  frontmatter-schema: error
+
+  # Relative links must exist on disk without exception
+  validate-links: error
+
+  # References to @files and #tool:<name> must strictly resolve
+  validate-references:
+    severity: error
+    validateTools: true
+
+  # No raw H2 headings anywhere outside XML blocks
+  disallow-h2:
+    severity: error
+    allowInsideContainers: true
+
+  # Blocks over 3 lines: executable languages error, other languages warn
+  max-code-block-lines:
+    severity: error
+    maxLines: 3
+    ignoreLanguages: []
+
+  # In strict mode, reasoning models are mandatory for agents
+  model-recommendation:
+    severity: error
+    requireModel: true
+    reasoningModels:
+      - o1
+      - o3
+      - r1
+      - thinking
+      - sonnet-3.7
+      - claude-3-7-sonnet
+      - claude-3.7-sonnet
+
+harnesses:
+  vscode:
+    rules:
+      frontmatter-schema: error
+      validate-references:
+        severity: error
+        validateTools: true
+
+artifacts:
+  # Agents must contain both <rules> and <workflow> containers
+  agents:
+    rules:
+      require-xml-containers:
+        severity: error
+        containers:
+          - rules
+          - workflow
+      disallow-h2:
+        severity: error
+        allowInsideContainers: true
+
+  # Skills must match parent folder name and cannot contain dead links
+  skills:
+    rules:
+      disallow-h2: off
+      skill-directory-match: error
+      require-xml-containers: off
+
+  instructions:
+    rules:
+      require-xml-containers: off
+
+  prompts:
+    rules:
+      require-xml-containers: off
+
+  # Hook scripts must be valid and exist on disk
+  hooks:
+    rules:
+      validate-hooks: error
